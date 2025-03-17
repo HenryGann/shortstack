@@ -1,6 +1,7 @@
 'use client';
 import graphqlClient from '@/util/graphqlClient';
 import { getByShort } from '@/util/graphqlRequests';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 export default function Home() {
@@ -14,22 +15,12 @@ export default function Home() {
     console.log(long);
   };
 
-  const getLongUrl = () => {
-    graphqlClient.query({ query: getByShort, variables: { short: 'f4368e26' } }).then((res) => {
-      const { getByShort: { long } } = res.data;
-      console.log(res.data);
-      if(long){
-        window.location.href = long; 
-      }
-    });
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black px-6">
       <h1 className="text-3xl font-bold text-white mb-6">Shortstack - A URL Shortener</h1>
       <form
         className="flex flex-col items-center gap-4 bg-gray-900 p-6 rounded-xl shadow-lg w-full max-w-md"
-        onSubmit={handleSubmit(() => getLongUrl())}
+        onSubmit={handleSubmit((data) => createShort(data))}
       >
         <input
           className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
