@@ -1,9 +1,9 @@
-// pages/[short].tsx
 import { GetServerSideProps } from 'next';
 import graphqlClient from '@/util/graphqlClient';
 import { getByShort } from '@/util/graphqlRequests';
+import { SHORT_LENGTH } from '@/util/url';
 
-// Function to fetch long URL from GraphQL API
+// Fetches long url
 const getLongUrl = async (short: string): Promise<string | null> => {
   try {
     const res = await graphqlClient.query({
@@ -12,20 +12,18 @@ const getLongUrl = async (short: string): Promise<string | null> => {
     });
 
     const { getByShort: { long } } = res.data;
-    return long || null; // Ensure a null value if `long` is undefined
+    return long || null;
   } catch (error) {
     console.error('Error fetching long URL:', error);
     return null;
   }
 };
 
-// Server-side logic to fetch and redirect
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const short = params?.short as string;
-  console.log(short);
 
-  // Validate the `short` parameter
-  if (!short || short.length !== 8) {
+  // Checks for a valid URL else returns home
+  if (!short || short.length !== SHORT_LENGTH) {
     return {
       redirect: {
         destination: '/',
@@ -34,20 +32,17 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     };
   }
 
-  // Fetch the long URL
   const longUrl = await getLongUrl(short);
 
-  // Redirect to the long URL if found
+  // Handle redirection
   if (longUrl) {
     return {
       redirect: {
         destination: longUrl,
-        permanent: false, // Use `true` for permanent redirects (301)
+        permanent: false,
       },
     };
   }
-
-  // If no valid long URL found, redirect to home page
   return {
     redirect: {
       destination: '/',
@@ -56,7 +51,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   };
 };
 
-// This page will never be rendered since we are redirecting in `getServerSideProps`
 export default function ShortPage() {
   return null;
 }
