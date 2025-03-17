@@ -1,17 +1,25 @@
 'use client';
-import graphqlClient from '@/util/graphqlClient';
-import { getByShort } from '@/util/graphqlRequests';
-import { useEffect } from 'react';
+
+import FormData from '@/types/forms';
+
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 export default function Home() {
+  const schema = z.object({
+    long: z.string()
+      .regex(/^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/, { message: 'Please enter a valid url' })
+      .nonempty({ message: 'A URL is required' })
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const createShort = ({ long }) => {
+  const createShort = ({ long }: FormData) => {
     console.log(long);
   };
 
@@ -24,7 +32,7 @@ export default function Home() {
       >
         <input
           className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          {...register('long', { required: 'Enter a URL' })}
+          {...register('long')}
           placeholder="Enter a long URL"
         />
         {errors.long && <p className="text-red-400">{errors.long.message}</p>}
